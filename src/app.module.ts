@@ -8,6 +8,8 @@ import { ConfigModule } from '@nestjs/config';
 import { CategoriesModule } from './categories/categories.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { MediaModule } from './media/media.module';
+import { PaymentsModule } from './payments/payments.module';
+import { BadgesModule } from './badges/badges.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { MediaModule } from './media/media.module';
     CategoriesModule,
     CampaignsModule,
     MediaModule,
+    PaymentsModule,
+    BadgesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
