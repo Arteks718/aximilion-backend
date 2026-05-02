@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { CategoriesModule } from './categories/categories.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CampaignsModule } from './campaigns/campaigns.module';
     UsersModule,
     CategoriesModule,
     CampaignsModule,
+    MediaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
