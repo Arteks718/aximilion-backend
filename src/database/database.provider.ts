@@ -9,11 +9,20 @@ export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
 export const databaseProvider: Provider = {
   provide: DATABASE_CONNECTION,
   inject: [ConfigService],
-  useFactory: (configService: ConfigService) => {
+  useFactory: async (configService: ConfigService) => {
     const connectionString = configService.get<string>('DATABASE_URL');
     const pool = new Pool({
       connectionString,
     });
+    try {
+      const client = await pool.connect();
+      await client.query('SELECT 1'); // Lightweight ping
+      client.release();
+      console.log('Database connection successful');
+    } catch (error) {
+      console.error('Failed to connect to the database:', error.message);
+      throw error; // Prevents the NestJS app from starting with a dead connection
+    }
     return drizzle(pool, { schema });
   },
 };
