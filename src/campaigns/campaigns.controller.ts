@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { CampaignsService } from './campaigns.service';
 import { AuthGuard } from '@nestjs/passport';
+import { CreateCampaignDto } from './dto/create-campaign.dto';
 
 @Controller('campaigns')
 export class CampaignsController {
@@ -23,7 +24,7 @@ export class CampaignsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  create(@Req() req: any, @Body() data: any) {
+  create(@Req() req: any, @Body() data: CreateCampaignDto) {
     const user = req.user;
     if (user.role !== 'publisher') {
       throw new ForbiddenException('Only publishers can create campaigns');
