@@ -10,6 +10,7 @@ import { CampaignsModule } from './campaigns/campaigns.module';
 import { MediaModule } from './media/media.module';
 import { PaymentsModule } from './payments/payments.module';
 import { BadgesModule } from './badges/badges.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { BadgesModule } from './badges/badges.module';
     MediaModule,
     PaymentsModule,
     BadgesModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
