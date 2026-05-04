@@ -89,6 +89,16 @@ export const userBadges = pgTable(
   })
 );
 
+export const milestones = pgTable('milestones', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  campaignId: uuid('campaign_id')
+    .references(() => campaigns.id, { onDelete: 'cascade' })
+    .notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+});
+
 export const media = pgTable('media', {
   id: uuid('id').primaryKey().defaultRandom(),
   campaignId: uuid('campaign_id')
@@ -120,7 +130,15 @@ export const campaignsRelations = relations(campaigns, ({ one, many }) => ({
     references: [categories.id],
   }),
   payments: many(payments),
+  milestones: many(milestones),
   media: many(media),
+}));
+
+export const milestonesRelations = relations(milestones, ({ one }) => ({
+  campaign: one(campaigns, {
+    fields: [milestones.campaignId],
+    references: [campaigns.id],
+  }),
 }));
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
