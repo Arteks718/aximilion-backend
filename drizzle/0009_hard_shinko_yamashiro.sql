@@ -1,0 +1,1 @@
+ALTER TABLE "categories" ADD COLUMN "iconPrefix" varchar(255) NOT NULL;

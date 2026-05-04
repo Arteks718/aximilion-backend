@@ -13,10 +13,10 @@ async function seed() {
   const db = drizzle(pool, { schema });
 
   const values = [
-    { name: 'Medical' },
-    { name: 'Military' },
-    { name: 'Animals' },
-    { name: 'Rebuild' },
+    { name: 'Medical', iconPrefix: 'pi-heart' },
+    { name: 'Military', iconPrefix: 'pi-shield' },
+    { name: 'Animals', iconPrefix: 'pi-paw' },
+    { name: 'Rebuild', iconPrefix: 'pi-home' },
   ];
 
   await db.insert(categories).values(values).onConflictDoNothing();

@@ -35,6 +35,7 @@ export const users = pgTable('users', {
 export const categories = pgTable('categories', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name', { length: 255 }).notNull().unique(),
+  iconPrefix: varchar('iconPrefix', { length: 255 }).notNull(),
 });
 
 export const campaigns = pgTable('campaigns', {

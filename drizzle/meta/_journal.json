@@ -64,6 +64,13 @@
       "when": 1777930951521,
       "tag": "0008_spicy_rogue",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1777930971412,
+      "tag": "0009_hard_shinko_yamashiro",
+      "breakpoints": true
     }
   ]
 }
