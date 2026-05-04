@@ -1,7 +1,19 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req, ForbiddenException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Req,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CampaignsService } from './campaigns.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
+import { FilterCampaignsDto } from './dto/filter-campaigns.dto';
 import { UsersService } from '../users/users.service';
 
 @Controller('campaigns')
@@ -11,9 +23,15 @@ export class CampaignsController {
     private readonly usersService: UsersService,
   ) {}
 
+  /**
+   * GET /campaigns?category=...&minGoal=...&maxGoal=...&verified=...&sortBy=...&page=...&limit=...
+   *
+   * Returns { data: Campaign[], totalCount: number } for the Explore page.
+   * The `images` JSONB field is always included in each campaign object.
+   */
   @Get()
-  findAllActive() {
-    return this.campaignsService.findAllActive();
+  findAll(@Query() filters: FilterCampaignsDto) {
+    return this.campaignsService.findFiltered(filters);
   }
 
   @UseGuards(AuthGuard('jwt'))

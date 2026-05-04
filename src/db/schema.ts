@@ -55,6 +55,7 @@ export const campaigns = pgTable('campaigns', {
   legalProofUrl: text('legal_proof_url'),
   financialAuditUrl: text('financial_audit_url'),
   status: campaignStatusEnum('status').default('pending').notNull(),
+  endDate: timestamp('end_date'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

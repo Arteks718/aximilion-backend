@@ -2,7 +2,8 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { desc, eq, and, gte, lte, asc, sql, SQL, count } from 'drizzle-orm';
+import { FilterCampaignsDto } from './dto/filter-campaigns.dto';
 
 @Injectable()
 export class CampaignsService {
@@ -51,15 +52,99 @@ export class CampaignsService {
     });
   }
 
-  async findAllActive() {
+  /**
+   * Find campaigns with filtering, sorting, and pagination for the Explore page.
+   * Returns { data, totalCount } so the frontend can compute pagination.
+   */
+  async findFiltered(filters: FilterCampaignsDto) {
+    const {
+      category,
+      minGoal,
+      maxGoal,
+      verified,
+      sortBy = 'recent',
+      page = 1,
+      limit = 12,
+    } = filters;
+
+    // ── Build dynamic WHERE conditions ──────────────────────────
+    const conditions: SQL[] = [];
+
+    // By default only show active (verified) campaigns on Explore
+    if (verified === true || verified === undefined) {
+      conditions.push(eq(schema.campaigns.status, 'active'));
+    }
+    // verified === false → show all statuses (no status filter)
+
+    if (category) {
+      conditions.push(eq(schema.campaigns.categoryId, category));
+    }
+
+    if (minGoal !== undefined) {
+      conditions.push(
+        gte(schema.campaigns.goalAmount, String(minGoal)),
+      );
+    }
+
+    if (maxGoal !== undefined) {
+      conditions.push(
+        lte(schema.campaigns.goalAmount, String(maxGoal)),
+      );
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // ── Count total matching rows ───────────────────────────────
+    const [{ totalCount }] = await this.db
+      .select({ totalCount: count() })
+      .from(schema.campaigns)
+      .where(whereClause);
+
+    // ── Determine ORDER BY ──────────────────────────────────────
+    let orderByClause: SQL;
+    switch (sortBy) {
+      case 'funded':
+        // Progress = collected_internal / goal_amount  (descending — most funded first)
+        orderByClause = sql`(${schema.campaigns.collectedInternal}::numeric / NULLIF(${schema.campaigns.goalAmount}::numeric, 0)) DESC NULLS LAST`;
+        break;
+      case 'ending':
+        // Soonest deadline first; nulls go to the end
+        orderByClause = sql`${schema.campaigns.endDate} ASC NULLS LAST`;
+        break;
+      case 'recent':
+      default:
+        orderByClause = sql`${schema.campaigns.createdAt} DESC`;
+        break;
+    }
+
+    // ── Fetch paginated rows ────────────────────────────────────
+    const offset = (page - 1) * limit;
+
+    const data = await this.db
+      .select()
+      .from(schema.campaigns)
+      .where(whereClause)
+      .orderBy(orderByClause)
+      .limit(limit)
+      .offset(offset);
+
+    return { data, totalCount };
+  }
+
+  /** Legacy helper — still used by HomeView (top active campaigns). */
+  async findAllActive(limit: number = 10, offset: number = 0) {
     return this.db.query.campaigns.findMany({
       where: eq(schema.campaigns.status, 'active'),
+      limit,
+      offset,
+      orderBy: desc(schema.campaigns.createdAt)
     });
   }
 
   async findAllPending() {
     return this.db.query.campaigns.findMany({
       where: eq(schema.campaigns.status, 'pending'),
+      orderBy: desc(schema.campaigns.createdAt),
     });
   }
 
