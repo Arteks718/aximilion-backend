@@ -3,7 +3,6 @@ import { DATABASE_CONNECTION } from '../database/database.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../db/schema';
 import { eq } from 'drizzle-orm';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -20,12 +19,10 @@ export class UsersService {
   }
 
   async create(data: any) {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
     const [newUser] = await this.db
       .insert(schema.users)
       .values({
         email: data.email,
-        password: hashedPassword,
         role: 'registered',
         authProvider: 'local',
       })

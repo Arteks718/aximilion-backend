@@ -15,6 +15,13 @@
       "when": 1777896471264,
       "tag": "0001_clear_manta",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777914412982,
+      "tag": "0002_breezy_punisher",
+      "breakpoints": true
     }
   ]
 }

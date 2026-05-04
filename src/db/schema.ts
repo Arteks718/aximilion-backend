@@ -24,7 +24,6 @@ export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   supabaseUid: uuid('supabase_uid').unique(),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  password: text('password'), // Nullable for OAuth logins
   role: roleEnum('role').default('registered').notNull(),
   authProvider: authProviderEnum('auth_provider').default('local').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
