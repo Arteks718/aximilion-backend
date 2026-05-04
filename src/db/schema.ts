@@ -8,6 +8,7 @@ import {
   decimal,
   pgEnum,
   primaryKey,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -50,6 +51,9 @@ export const campaigns = pgTable('campaigns', {
   currency: currencyEnum('currency').default('USD').notNull(),
   collectedInternal: decimal('collected_internal', { precision: 12, scale: 2 }).default('0').notNull(),
   monoJarUrl: varchar('mono_jar_url', { length: 255 }),
+  images: jsonb('images').$type<{ url: string; type: string }[]>(),
+  legalProofUrl: text('legal_proof_url'),
+  financialAuditUrl: text('financial_audit_url'),
   status: campaignStatusEnum('status').default('pending').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

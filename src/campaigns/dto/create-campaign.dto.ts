@@ -20,6 +20,15 @@ export class MilestoneDto {
   amount: number;
 }
 
+export class ImageDto {
+  @IsString()
+  url: string;
+
+  @IsString()
+  @IsIn(['cover', 'gallery'])
+  type: 'cover' | 'gallery';
+}
+
 export class CreateCampaignDto {
   @IsString()
   @IsNotEmpty({ message: 'Title must not be empty' })
@@ -45,6 +54,20 @@ export class CreateCampaignDto {
   @IsOptional()
   @IsString()
   monoJarUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImageDto)
+  images?: ImageDto[];
+
+  @IsOptional()
+  @IsString()
+  legalProofUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  financialAuditUrl?: string;
 
   @IsOptional()
   @IsArray()

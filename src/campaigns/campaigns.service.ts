@@ -13,7 +13,7 @@ export class CampaignsService {
 
   async create(publisherId: string, data: any) {
     return this.db.transaction(async (tx) => {
-      // 1. Insert the campaign
+      // 1. Insert the campaign (including inline file URLs)
       const [newCampaign] = await tx
         .insert(schema.campaigns)
         .values({
@@ -24,6 +24,9 @@ export class CampaignsService {
           goalAmount: String(data.goalAmount),
           currency: data.currency || 'USD',
           monoJarUrl: data.monoJarUrl,
+          images: data.images || null,
+          legalProofUrl: data.legalProofUrl || null,
+          financialAuditUrl: data.financialAuditUrl || null,
           status: 'pending',
         })
         .returning();

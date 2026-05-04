@@ -43,6 +43,13 @@
       "when": 1777922885221,
       "tag": "0005_talented_zeigeist",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1777924682766,
+      "tag": "0006_fat_warstar",
+      "breakpoints": true
     }
   ]
 }
