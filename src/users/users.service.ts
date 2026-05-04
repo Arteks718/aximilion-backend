@@ -18,6 +18,13 @@ export class UsersService {
     return user;
   }
 
+  async findBySupabaseUid(supabaseUid: string) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.supabaseUid, supabaseUid),
+    });
+    return user;
+  }
+
   async create(data: any) {
     const [newUser] = await this.db
       .insert(schema.users)

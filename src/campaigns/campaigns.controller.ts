@@ -2,10 +2,14 @@ import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req, ForbiddenExc
 import { CampaignsService } from './campaigns.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
+import { UsersService } from '../users/users.service';
 
 @Controller('campaigns')
 export class CampaignsController {
-  constructor(private readonly campaignsService: CampaignsService) {}
+  constructor(
+    private readonly campaignsService: CampaignsService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Get()
   findAllActive() {
@@ -14,9 +18,9 @@ export class CampaignsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('pending')
-  findAllPending(@Req() req: any) {
-    const user = req.user;
-    if (user.role !== 'moderator') {
+  async findAllPending(@Req() req: any) {
+    const localUser = await this.usersService.findBySupabaseUid(req.user.supabase_uid);
+    if (!localUser || localUser.role !== 'moderator') {
       throw new ForbiddenException('Only moderators can view pending campaigns');
     }
     return this.campaignsService.findAllPending();
@@ -24,19 +28,19 @@ export class CampaignsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  create(@Req() req: any, @Body() data: CreateCampaignDto) {
-    const user = req.user;
-    if (user.role !== 'publisher') {
+  async create(@Req() req: any, @Body() data: CreateCampaignDto) {
+    const localUser = await this.usersService.findBySupabaseUid(req.user.supabase_uid);
+    if (!localUser || localUser.role !== 'publisher') {
       throw new ForbiddenException('Only publishers can create campaigns');
     }
-    return this.campaignsService.create(user.sub, data); // payload sub contains user ID
+    return this.campaignsService.create(localUser.id, data);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Patch(':id/status')
-  updateStatus(@Req() req: any, @Param('id') id: string, @Body('status') status: 'active' | 'rejected' | 'closed') {
-    const user = req.user;
-    if (user.role !== 'moderator') {
+  async updateStatus(@Req() req: any, @Param('id') id: string, @Body('status') status: 'active' | 'rejected' | 'closed') {
+    const localUser = await this.usersService.findBySupabaseUid(req.user.supabase_uid);
+    if (!localUser || localUser.role !== 'moderator') {
       throw new ForbiddenException('Only moderators can update campaign status');
     }
     return this.campaignsService.updateStatus(id, status);
