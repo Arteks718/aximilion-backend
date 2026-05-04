@@ -12,6 +12,7 @@ import {
 import { relations } from 'drizzle-orm';
 
 // --- Enums ---
+export const currencyEnum = pgEnum('currency', ['USD', 'EUR', 'UAH']);
 export const roleEnum = pgEnum('role', ['registered', 'moderator']);
 export const authProviderEnum = pgEnum('auth_provider', ['local', 'google', 'facebook']);
 export const campaignStatusEnum = pgEnum('campaign_status', ['pending', 'active', 'rejected', 'closed']);
@@ -46,6 +47,7 @@ export const campaigns = pgTable('campaigns', {
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description').notNull(),
   goalAmount: decimal('goal_amount', { precision: 12, scale: 2 }).notNull(),
+  currency: currencyEnum('currency').default('USD').notNull(),
   collectedInternal: decimal('collected_internal', { precision: 12, scale: 2 }).default('0').notNull(),
   monoJarUrl: varchar('mono_jar_url', { length: 255 }),
   status: campaignStatusEnum('status').default('pending').notNull(),
