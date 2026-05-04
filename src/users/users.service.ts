@@ -32,4 +32,24 @@ export class UsersService {
       .returning();
     return newUser;
   }
+  async syncSupabaseUser(supabaseUid: string, email: string) {
+    let user = await this.db.query.users.findFirst({
+      where: eq(schema.users.supabaseUid, supabaseUid),
+    });
+
+    if (!user) {
+      const [newUser] = await this.db
+        .insert(schema.users)
+        .values({
+          email: email,
+          supabaseUid: supabaseUid,
+          role: 'registered',
+          authProvider: 'local',
+        })
+        .returning();
+      user = newUser;
+    }
+
+    return user;
+  }
 }

@@ -36,4 +36,8 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(payload),
     };
   }
+
+  async syncSupabaseUser(sub: string, email: string) {
+    return this.usersService.syncSupabaseUser(sub, email);
+  }
 }
