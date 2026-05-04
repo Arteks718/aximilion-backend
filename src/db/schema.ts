@@ -19,7 +19,7 @@ export const authProviderEnum = pgEnum('auth_provider', ['local', 'google', 'fac
 export const campaignStatusEnum = pgEnum('campaign_status', ['pending', 'active', 'rejected', 'closed']);
 export const paymentProviderEnum = pgEnum('payment_provider', ['wayforpay', 'monobank']);
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'completed', 'failed', 'refunded']);
-export const mediaFileTypeEnum = pgEnum('media_file_type', ['photo', 'pdf_proof', 'report']);
+export const mediaFileTypeEnum = pgEnum('media_file_type', ['gallery', 'cover', 'legal_proof', 'financial_audit']);
 
 // --- Tables ---
 export const users = pgTable('users', {
