@@ -15,8 +15,8 @@ export class MediaService {
     private readonly db: NodePgDatabase<typeof schema>,
   ) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
-    const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
-    
+    const supabaseKey = this.configService.get<string>('SUPABASE_PUBLISHABLE_KEY');
+
     if (!supabaseUrl || !supabaseKey) {
       throw new Error('Supabase credentials missing from environment variables');
     }

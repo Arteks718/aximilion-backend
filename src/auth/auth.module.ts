@@ -14,7 +14,8 @@ import { JwtStrategy } from './jwt.strategy';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        // Used only for signing tokens in legacy register/login endpoints
+        secret: configService.get<string>('SUPABASE_JWT_SECRET'),
         signOptions: { expiresIn: '1d' },
       }),
     }),

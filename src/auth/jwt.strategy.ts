@@ -1,21 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { ConfigService } from '@nestjs/config';
+import { passportJwtSecret } from 'jwks-rsa';
+
+const SUPABASE_ISSUER = `${process.env.SUPABASE_URL}/auth/v1`;
+const JWKS_URI = `${process.env.SUPABASE_URL}/.well-known/jwks.json`;
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly configService: ConfigService) {
+  constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET')!,
+      secretOrKeyProvider: passportJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 5,
+        jwksUri: JWKS_URI,
+      }),
+      issuer: SUPABASE_ISSUER,
+      algorithms: ['ES256'],
     });
   }
 
   async validate(payload: any) {
-    // This payload is decoded from the JWT token
-    // returning it will inject it into `req.user`
-    return { sub: payload.sub, email: payload.email, role: payload.role };
+    // Payload decoded from the Supabase-issued RS256 JWT
+    // `sub` holds the Supabase user UUID; injected into `req.user`
+    return { supabase_uid: payload.sub, email: payload.email };
   }
 }
