@@ -12,7 +12,7 @@ import {
 import { relations } from 'drizzle-orm';
 
 // --- Enums ---
-export const roleEnum = pgEnum('role', ['registered', 'publisher', 'moderator']);
+export const roleEnum = pgEnum('role', ['registered', 'moderator']);
 export const authProviderEnum = pgEnum('auth_provider', ['local', 'google', 'facebook']);
 export const campaignStatusEnum = pgEnum('campaign_status', ['pending', 'active', 'rejected', 'closed']);
 export const paymentProviderEnum = pgEnum('payment_provider', ['wayforpay', 'monobank']);

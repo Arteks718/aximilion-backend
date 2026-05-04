@@ -22,6 +22,13 @@
       "when": 1777914412982,
       "tag": "0002_breezy_punisher",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1777921609369,
+      "tag": "0003_safe_proteus",
+      "breakpoints": true
     }
   ]
 }

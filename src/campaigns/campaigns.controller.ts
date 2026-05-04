@@ -30,8 +30,8 @@ export class CampaignsController {
   @Post()
   async create(@Req() req: any, @Body() data: CreateCampaignDto) {
     const localUser = await this.usersService.findBySupabaseUid(req.user.supabase_uid);
-    if (!localUser || localUser.role !== 'publisher') {
-      throw new ForbiddenException('Only publishers can create campaigns');
+    if(!localUser){
+      return null;
     }
     return this.campaignsService.create(localUser.id, data);
   }
