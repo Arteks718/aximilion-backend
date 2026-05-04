@@ -22,6 +22,7 @@ export const mediaFileTypeEnum = pgEnum('media_file_type', ['photo', 'pdf_proof'
 // --- Tables ---
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
+  supabaseUid: uuid('supabase_uid').unique(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   password: text('password'), // Nullable for OAuth logins
   role: roleEnum('role').default('registered').notNull(),
