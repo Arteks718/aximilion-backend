@@ -24,7 +24,7 @@ export class MediaService {
     this.supabase = createClient(supabaseUrl, supabaseKey);
   }
 
-  async uploadFile(file: Express.Multer.File, campaignId: string, fileType: 'photo' | 'pdf_proof' | 'report') {
+  async uploadFile(file: Express.Multer.File, campaignId: string, fileType: 'gallery' | 'cover' | 'legal_proof' | 'financial_audit') {
     const fileExtension = file.originalname.split('.').pop();
     const fileName = `${campaignId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
 

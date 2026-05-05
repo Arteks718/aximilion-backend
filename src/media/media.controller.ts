@@ -13,7 +13,7 @@ export class MediaController {
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body('campaignId') campaignId: string,
-    @Body('fileType') fileType: 'photo' | 'pdf_proof' | 'report'
+    @Body('fileType') fileType: 'gallery' | 'cover' | 'legal_proof' | 'financial_audit'
   ) {
     if (!file) {
       throw new BadRequestException('File is required');
