@@ -1,4 +1,5 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import { createClient } from '@supabase/supabase-js';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../db/schema';
@@ -66,5 +67,37 @@ export class BadgesService {
       }
     });
     return userBadgesList.map(ub => ub.badge);
+  }
+
+  async createBadge(data: any, file?: Express.Multer.File) {
+    let iconUrl = data.icon_url;
+
+    if (file) {
+      const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SECRET_KEY || '');
+      const filename = `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+      
+      const { error } = await supabase.storage.from('badges').upload(filename, file.buffer, {
+        contentType: file.mimetype,
+      });
+
+      if (error) {
+        throw new InternalServerErrorException('Failed to upload badge icon: ' + error.message);
+      }
+
+      const { data: publicUrlData } = supabase.storage.from('badges').getPublicUrl(filename);
+      iconUrl = publicUrlData.publicUrl;
+    }
+
+    if (!iconUrl) {
+      throw new BadRequestException('Icon file or icon_url is required');
+    }
+
+    const [badge] = await this.db.insert(schema.badges).values({
+      name: data.name,
+      iconUrl: iconUrl,
+      criteriaType: data.criteria_type,
+      criteriaValue: String(data.criteria_value),
+    }).returning();
+    return badge;
   }
 }

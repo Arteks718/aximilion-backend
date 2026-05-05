@@ -11,6 +11,8 @@ import { MediaModule } from './media/media.module';
 import { PaymentsModule } from './payments/payments.module';
 import { BadgesModule } from './badges/badges.module';
 import { StatsModule } from './stats/stats.module';
+import { ModeratorController } from './moderator/moderator.controller';
+import { ModeratorModule } from './moderator/moderator.module';
 
 @Module({
   imports: [
@@ -27,8 +29,9 @@ import { StatsModule } from './stats/stats.module';
     PaymentsModule,
     BadgesModule,
     StatsModule,
+    ModeratorModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, ModeratorController],
   providers: [AppService],
 })
 export class AppModule {}
