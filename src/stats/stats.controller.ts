@@ -7,6 +7,11 @@ export class StatsController {
 
   @Get()
   getStats() {
-    return this.statsService.getStats();
+    return this.statsService.getPlatformStats();
+  }
+
+  @Get('platform')
+  getPlatformStats() {
+    return this.statsService.getPlatformStats();
   }
 }
