@@ -20,6 +20,7 @@ export const authProviderEnum = pgEnum('auth_provider', ['local', 'google', 'fac
 export const campaignStatusEnum = pgEnum('campaign_status', ['pending', 'active', 'rejected', 'closed']);
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success', 'failed', 'refunded']);
 export const mediaFileTypeEnum = pgEnum('media_file_type', ['gallery', 'cover', 'legal_proof', 'financial_audit']);
+export const badgeCriteriaTypeEnum = pgEnum('badge_criteria_type', ['donations_count', 'total_amount', 'unique_campaigns']);
 
 // --- Tables ---
 export const users = pgTable('users', {
@@ -81,7 +82,9 @@ export const payments = pgTable('payments', {
 export const badges = pgTable('badges', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name', { length: 255 }).notNull().unique(),
-  requiredDonationsCount: integer('required_donations_count').notNull(),
+  iconUrl: varchar('icon_url', { length: 255 }),
+  criteriaType: badgeCriteriaTypeEnum('criteria_type').notNull(),
+  criteriaValue: decimal('criteria_value', { precision: 12, scale: 2 }).notNull(),
 });
 
 export const userBadges = pgTable(
