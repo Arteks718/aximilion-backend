@@ -3,7 +3,7 @@ import { DATABASE_CONNECTION } from '../database/database.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../db/schema';
 import { BadgesService } from '../badges/badges.service';
-import { eq } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import StripeClient from 'stripe';
 import type { Stripe } from 'stripe';
 import { PaymentIntent } from 'node_modules/stripe/cjs/resources/PaymentIntents';
@@ -137,4 +137,20 @@ export class PaymentsService {
     throw new BadRequestException('Failed to fetch data from Monobank');
   }
 }
+
+  async getLatestDonations() {
+    return this.db
+      .select({
+        id: schema.payments.id,
+        amount: schema.payments.amount,
+        currency: schema.payments.currency,
+        createdAt: schema.payments.createdAt,
+        donorName: sql<string>`COALESCE(${schema.users.email}, 'Anonymous')`,
+      })
+      .from(schema.payments)
+      .leftJoin(schema.users, eq(schema.payments.donorId, schema.users.supabaseUid))
+      .where(eq(schema.payments.status, 'success'))
+      .orderBy(desc(schema.payments.createdAt))
+      .limit(5);
+  }
 }
