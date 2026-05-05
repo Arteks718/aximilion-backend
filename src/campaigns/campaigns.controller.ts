@@ -44,6 +44,15 @@ export class CampaignsController {
     return this.campaignsService.findAllPending();
   }
 
+  /**
+   * GET /campaigns/:id
+   * Returns a single campaign with milestones and category.
+   */
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.campaignsService.findById(id);
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(@Req() req: any, @Body() data: CreateCampaignDto) {

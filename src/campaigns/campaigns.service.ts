@@ -131,6 +131,21 @@ export class CampaignsService {
     return { data, totalCount };
   }
 
+  /** Find a single campaign by ID (for the detail page). */
+  async findById(id: string) {
+    const campaign = await this.db.query.campaigns.findFirst({
+      where: eq(schema.campaigns.id, id),
+      with: {
+        milestones: true,
+        category: true,
+      },
+    });
+    if (!campaign) {
+      throw new NotFoundException(`Campaign ${id} not found`);
+    }
+    return campaign;
+  }
+
   /** Legacy helper — still used by HomeView (top active campaigns). */
   async findAllActive(limit: number = 10, offset: number = 0) {
     return this.db.query.campaigns.findMany({
