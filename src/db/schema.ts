@@ -9,6 +9,7 @@ import {
   pgEnum,
   primaryKey,
   jsonb,
+  date,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -27,6 +28,10 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 255 }).notNull().unique(),
   role: roleEnum('role').default('registered').notNull(),
   authProvider: authProviderEnum('auth_provider').default('local').notNull(),
+  fullName: varchar('full_name', { length: 255 }),
+  phone: varchar('phone', { length: 50 }),
+  dateOfBirth: date('date_of_birth'),
+  gender: varchar('gender', { length: 50 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
