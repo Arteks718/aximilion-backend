@@ -12,4 +12,8 @@ export class CreatePaymentIntentDto {
   @IsString()
   @IsOptional()
   currency: string = 'usd';
+
+  @IsString()
+  @IsOptional()
+  userId: string | null;
 }

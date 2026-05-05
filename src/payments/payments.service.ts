@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../db/schema';
@@ -30,7 +30,7 @@ export class PaymentsService {
   /**
    * Create PaymentIntent with Stripe
    */
-  async createPaymentIntent(dto: { campaignId: string; amount: number; currency?: string }, userId?: string) {
+  async createPaymentIntent(dto: { campaignId: string; amount: number; currency?: string, userId: string | null }) {
     const amountInCents = Math.round(dto.amount * 100);
 
     const paymentIntent = await this.stripe.paymentIntents.create({
@@ -38,14 +38,14 @@ export class PaymentsService {
       currency: dto.currency ?? 'usd',
       metadata: {
         campaignId: dto.campaignId,
-        userId: userId ?? 'anonymous',
+        userId: dto.userId ?? 'anonymous',
       },
     });
 
     const [payment] = await this.db
       .insert(schema.payments)
       .values({
-        donorId: userId ?? null,
+        donorId: dto.userId ?? null,
         campaignId: dto.campaignId,
         amount: amountInCents, // Better save in cents
         currency: dto.currency ?? 'usd',
@@ -63,7 +63,6 @@ export class PaymentsService {
 
   async handleWebhook(signature: string, payload: Buffer) {
     let event: Event;
-    console.log('test webhook', signature, payload)
     try {
       event = this.stripe.webhooks.constructEvent(
         payload,
@@ -88,8 +87,6 @@ export class PaymentsService {
       .from(schema.payments)
       .where(eq(schema.payments.stripePaymentIntentId, intent.id))
       .limit(1);
-
-    console.log('Payment found', payment);
 
     if (!payment || payment.status === 'success') return;
 
