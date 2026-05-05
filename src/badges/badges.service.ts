@@ -14,7 +14,7 @@ export class BadgesService {
   async checkAndAssignBadges(userId: string) {
     const result = await this.db.select({ count: count() })
       .from(schema.payments)
-      .where(and(eq(schema.payments.donorId, userId), eq(schema.payments.status, 'completed')));
+      .where(and(eq(schema.payments.donorId, userId), eq(schema.payments.status, 'success')));
     
     const donationsCount = result[0].count;
 

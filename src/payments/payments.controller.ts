@@ -1,13 +1,44 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import * as common from '@nestjs/common';
 import { PaymentsService } from './payments.service';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
-@Controller('payments')
+@common.Controller('payments')
 export class PaymentsController {
-  constructor(private readonly paymentsService: PaymentsService) {}
+  constructor(private readonly paymentsService: PaymentsService) { }
 
-  @Post('webhook')
-  async wayForPayWebhook(@Body() body: any) {
-    const payment = await this.paymentsService.processWayForPayWebhook(body);
-    return { status: 'success', paymentId: payment.id };
+  /**
+   * POST /payments/create-intent
+   * Creates a test PaymentIntent and stores a pending transaction.
+   * Returns { clientSecret, transactionId }
+   */
+  @common.Post('create-intent')
+  async createIntent(
+    @common.Body() body: { campaignId: string; amount: number; currency?: string },
+    @common.Req() req: any,
+  ) {
+    const userId = req.user?.supabase_uid as string;
+    return this.paymentsService.createPaymentIntent(body, userId);
+  }
+
+  /**
+   * POST /payments/webhook
+   * Receives events from Stripe (e.g., payment_intent.succeeded)
+   */
+  @common.Post('webhook')
+  async webhook(
+    @common.Headers('stripe-signature') signature: string,
+    @common.Req() req: common.RawBodyRequest<Request>,
+  ) {
+    if (!signature) {
+      throw new common.BadRequestException('Missing stripe-signature header');
+    }
+
+    const rawBody = req.rawBody;
+    if (!rawBody) {
+      throw new common.BadRequestException('Missing raw body');
+    }
+
+    return this.paymentsService.handleWebhook(signature, rawBody);
   }
 }

@@ -17,8 +17,7 @@ export const currencyEnum = pgEnum('currency', ['USD', 'EUR', 'UAH']);
 export const roleEnum = pgEnum('role', ['registered', 'moderator']);
 export const authProviderEnum = pgEnum('auth_provider', ['local', 'google', 'facebook']);
 export const campaignStatusEnum = pgEnum('campaign_status', ['pending', 'active', 'rejected', 'closed']);
-export const paymentProviderEnum = pgEnum('payment_provider', ['wayforpay', 'monobank']);
-export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'completed', 'failed', 'refunded']);
+export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success', 'failed', 'refunded']);
 export const mediaFileTypeEnum = pgEnum('media_file_type', ['gallery', 'cover', 'legal_proof', 'financial_audit']);
 
 // --- Tables ---
@@ -63,13 +62,14 @@ export const campaigns = pgTable('campaigns', {
 
 export const payments = pgTable('payments', {
   id: uuid('id').primaryKey().defaultRandom(),
-  donorId: uuid('donor_id').references(() => users.id, { onDelete: 'set null' }), // Can be null if anonymous donation is allowed
+  donorId: uuid('donor_id').references(() => users.supabaseUid, { onDelete: 'set null' }), // Can be null if anonymous donation is allowed
   campaignId: uuid('campaign_id')
     .references(() => campaigns.id, { onDelete: 'cascade' })
     .notNull(),
-  amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
-  provider: paymentProviderEnum('provider').notNull(),
+  amount: integer('amount').notNull(),
+  currency: varchar('currency', { length: 10 }).default('usd').notNull(),
   status: paymentStatusEnum('status').default('pending').notNull(),
+  stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
