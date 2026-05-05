@@ -44,6 +44,11 @@ export class CampaignsController {
     return this.campaignsService.findAllPending();
   }
 
+  @Get('search')
+  search(@Query('q') q: string) {
+    return this.campaignsService.search(q);
+  }
+
   /**
    * GET /campaigns/:id
    * Returns a single campaign with milestones and category.

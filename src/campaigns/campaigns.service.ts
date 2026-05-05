@@ -2,7 +2,7 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../db/schema';
-import { desc, eq, and, gte, lte, asc, sql, SQL, count } from 'drizzle-orm';
+import { desc, eq, and, gte, lte, asc, sql, SQL, count, ilike, or } from 'drizzle-orm';
 import { FilterCampaignsDto } from './dto/filter-campaigns.dto';
 
 @Injectable()
@@ -202,5 +202,45 @@ export class CampaignsService {
     const donations = hasMore ? results.slice(0, limit) : results;
 
     return { donations, hasMore };
+  }
+
+  async search(q: string) {
+    if (!q || q.trim() === '') {
+      return [];
+    }
+    
+    const searchTerm = `%${q}%`;
+    
+    const results = await this.db
+      .select({
+        id: schema.campaigns.id,
+        title: schema.campaigns.title,
+        images: schema.campaigns.images,
+      })
+      .from(schema.campaigns)
+      .where(
+        and(
+          eq(schema.campaigns.status, 'active'),
+          or(
+            ilike(schema.campaigns.title, searchTerm),
+            ilike(schema.campaigns.description, searchTerm)
+          )
+        )
+      )
+      .limit(5);
+
+    return results.map(c => {
+      let coverUrl = null;
+      if (c.images && Array.isArray(c.images)) {
+        const cover = c.images.find((img: any) => img.type === 'cover');
+        if (cover) coverUrl = cover.url;
+        else if (c.images.length > 0) coverUrl = c.images[0].url;
+      }
+      return {
+        id: c.id,
+        title: c.title,
+        coverUrl
+      };
+    });
   }
 }
