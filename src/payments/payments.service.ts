@@ -8,6 +8,7 @@ import StripeClient from 'stripe';
 import type { Stripe } from 'stripe';
 import { PaymentIntent } from 'node_modules/stripe/cjs/resources/PaymentIntents';
 import { Event } from 'node_modules/stripe/cjs/resources/Events';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class PaymentsService {
@@ -17,6 +18,7 @@ export class PaymentsService {
     @Inject(DATABASE_CONNECTION)
     private readonly db: NodePgDatabase<typeof schema>,
     private readonly badgesService: BadgesService,
+    private readonly httpService: HttpService,
   ) {
 
     this.stripe = new StripeClient(process.env.STRIPE_SECRET_KEY as string, {
@@ -114,4 +116,25 @@ export class PaymentsService {
       await this.badgesService.checkAndAssignBadges(payment.donorId);
     }
   }
+
+  async getMonobankJarStatus(jarId: string) {
+  try {
+    const response = await this.httpService.axiosRef.post('https://send.monobank.ua/api/handler', {
+      "Pc": "BAg2rqDuXLHdmGMSozSifeYs62LNrlauyqYnchg2r3ms+W6zCKLh/mr/vGqm+/Um8LIGq6Ylcqb+VMquLb5u1pM=",
+      "c": "hello",
+      "clientId": jarId
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        // Бекенд може вільно ставити User-Agent
+        "User-Agent": "PostmanRuntime/7.53.0", 
+      }
+    });
+
+    return response.data;
+  } catch (error) {
+    throw new BadRequestException('Failed to fetch data from Monobank');
+  }
+}
 }

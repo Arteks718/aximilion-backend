@@ -41,4 +41,9 @@ export class PaymentsController {
 
     return this.paymentsService.handleWebhook(signature, rawBody);
   }
+
+  @common.Get('mono-status/:jarId')
+  async getMonoStatus(@common.Param('jarId') jarId: string) {
+    return this.paymentsService.getMonobankJarStatus(jarId);
+  }
 }
