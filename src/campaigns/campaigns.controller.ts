@@ -34,15 +34,7 @@ export class CampaignsController {
     return this.campaignsService.findFiltered(filters);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('pending')
-  async findAllPending(@Req() req: any) {
-    const localUser = await this.usersService.findBySupabaseUid(req.user.supabase_uid);
-    if (!localUser || localUser.role !== 'moderator') {
-      throw new ForbiddenException('Only moderators can view pending campaigns');
-    }
-    return this.campaignsService.findAllPending();
-  }
+
 
   @Get('search')
   search(@Query('q') q: string) {
@@ -54,8 +46,19 @@ export class CampaignsController {
    * Returns a single campaign with milestones and category.
    */
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.campaignsService.findById(id);
+  async findOne(@Req() req: any, @Param('id') id: string) {
+    let requestingUser = null;
+    const authHeader = req.headers?.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SECRET_KEY || '');
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) {
+        requestingUser = await this.usersService.findBySupabaseUid(user.id);
+      }
+    }
+    return this.campaignsService.findById(id, requestingUser);
   }
 
   @Get(':id/donations')
@@ -79,13 +82,5 @@ export class CampaignsController {
     return this.campaignsService.create(localUser.id, data);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Patch(':id/status')
-  async updateStatus(@Req() req: any, @Param('id') id: string, @Body('status') status: 'active' | 'rejected' | 'closed') {
-    const localUser = await this.usersService.findBySupabaseUid(req.user.supabase_uid);
-    if (!localUser || localUser.role !== 'moderator') {
-      throw new ForbiddenException('Only moderators can update campaign status');
-    }
-    return this.campaignsService.updateStatus(id, status);
-  }
+
 }

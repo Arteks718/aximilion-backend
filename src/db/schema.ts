@@ -62,6 +62,7 @@ export const campaigns = pgTable('campaigns', {
   financialAuditUrl: text('financial_audit_url'),
   status: campaignStatusEnum('status').default('pending').notNull(),
   endDate: timestamp('end_date'),
+  publishedAt: timestamp('published_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

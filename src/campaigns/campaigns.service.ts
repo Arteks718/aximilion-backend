@@ -132,7 +132,7 @@ export class CampaignsService {
   }
 
   /** Find a single campaign by ID (for the detail page). */
-  async findById(id: string) {
+  async findById(id: string, requestingUser?: any) {
     const campaign = await this.db.query.campaigns.findFirst({
       where: eq(schema.campaigns.id, id),
       with: {
@@ -143,6 +143,19 @@ export class CampaignsService {
     if (!campaign) {
       throw new NotFoundException(`Campaign ${id} not found`);
     }
+
+    if (campaign.status === 'pending') {
+      let canView = false;
+      if (requestingUser) {
+        if (requestingUser.role === 'moderator' || campaign.publisherId === requestingUser.id) {
+          canView = true;
+        }
+      }
+      if (!canView) {
+        throw new NotFoundException(`Campaign ${id} not found`);
+      }
+    }
+
     return campaign;
   }
 
@@ -164,9 +177,13 @@ export class CampaignsService {
   }
 
   async updateStatus(id: string, status: 'active' | 'rejected' | 'closed') {
+    const updateData: any = { status };
+    if (status === 'active') {
+      updateData.publishedAt = new Date();
+    }
     const [updated] = await this.db
       .update(schema.campaigns)
-      .set({ status })
+      .set(updateData)
       .where(eq(schema.campaigns.id, id))
       .returning();
     
