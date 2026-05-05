@@ -175,4 +175,32 @@ export class CampaignsService {
     }
     return updated;
   }
+
+  async getDonations(campaignId: string, limit: number = 5, offset: number = 0) {
+    const queryLimit = limit + 1;
+    const results = await this.db
+      .select({
+        id: schema.payments.id,
+        amount: schema.payments.amount,
+        currency: schema.payments.currency,
+        createdAt: schema.payments.createdAt,
+        donorName: sql<string>`COALESCE(${schema.users.email}, 'Anonymous')`,
+      })
+      .from(schema.payments)
+      .leftJoin(schema.users, eq(schema.payments.donorId, schema.users.supabaseUid))
+      .where(
+        and(
+          eq(schema.payments.campaignId, campaignId),
+          eq(schema.payments.status, 'success')
+        )
+      )
+      .orderBy(desc(schema.payments.createdAt))
+      .limit(queryLimit)
+      .offset(offset);
+
+    const hasMore = results.length > limit;
+    const donations = hasMore ? results.slice(0, limit) : results;
+
+    return { donations, hasMore };
+  }
 }

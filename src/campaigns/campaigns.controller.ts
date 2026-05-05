@@ -53,6 +53,17 @@ export class CampaignsController {
     return this.campaignsService.findById(id);
   }
 
+  @Get(':id/donations')
+  getDonations(
+    @Param('id') id: string,
+    @Query('limit') limitStr?: string,
+    @Query('offset') offsetStr?: string,
+  ) {
+    const limit = limitStr ? parseInt(limitStr, 10) : 5;
+    const offset = offsetStr ? parseInt(offsetStr, 10) : 0;
+    return this.campaignsService.getDonations(id, limit, offset);
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(@Req() req: any, @Body() data: CreateCampaignDto) {
