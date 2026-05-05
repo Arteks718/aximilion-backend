@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../db/schema';
-import { eq, sum, countDistinct, and, desc, sql } from 'drizzle-orm';
+import { eq, sum, count, countDistinct, and, desc, sql } from 'drizzle-orm';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
@@ -267,5 +267,74 @@ export class UsersService {
       })),
       total: Number(total),
     };
+  }
+
+  async getPublisherStats(supabaseUid: string) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.supabaseUid, supabaseUid)
+    });
+    if (!user) return { totalRaised: 0, activeCampaignsCount: 0, totalDonors: 0 };
+
+    const [stats] = await this.db
+      .select({
+        totalRaised: sum(schema.campaigns.collectedInternal),
+      })
+      .from(schema.campaigns)
+      .where(eq(schema.campaigns.publisherId, user.id));
+
+    // Active campaigns count explicitly where status is active
+    const [activeStats] = await this.db
+      .select({ count: count(schema.campaigns.id) })
+      .from(schema.campaigns)
+      .where(and(eq(schema.campaigns.publisherId, user.id), eq(schema.campaigns.status, 'active')));
+
+    // Total donors to their campaigns
+    const paymentsList = await this.db
+      .select({ donorId: schema.payments.donorId })
+      .from(schema.payments)
+      .innerJoin(schema.campaigns, eq(schema.payments.campaignId, schema.campaigns.id))
+      .where(and(eq(schema.campaigns.publisherId, user.id), eq(schema.payments.status, 'success')));
+
+    const uniqueDonors = new Set(paymentsList.filter(p => p.donorId !== null).map(p => p.donorId));
+    const anonymousCount = paymentsList.filter(p => p.donorId === null).length;
+
+    return {
+      totalRaised: parseFloat(stats?.totalRaised || '0'),
+      activeCampaignsCount: activeStats?.count || 0,
+      totalDonors: uniqueDonors.size + anonymousCount
+    };
+  }
+
+  async getMyCampaigns(supabaseUid: string) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.supabaseUid, supabaseUid)
+    });
+    if (!user) return [];
+
+    const results = await this.db.query.campaigns.findMany({
+      where: eq(schema.campaigns.publisherId, user.id),
+      orderBy: [desc(schema.campaigns.createdAt)]
+    });
+    
+    return results.map(r => {
+      let cover_image_url = null;
+      if (r.images && Array.isArray(r.images)) {
+        const cover = r.images.find((img: any) => img.type === 'cover');
+        if (cover) cover_image_url = cover.url;
+        else if (r.images.length > 0) cover_image_url = r.images[0].url;
+      }
+
+      return {
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        goalAmount: parseFloat(r.goalAmount as any),
+        collectedInternal: parseFloat(r.collectedInternal as any),
+        status: r.status,
+        endDate: r.endDate,
+        cover_image_url,
+        images: r.images
+      };
+    });
   }
 }

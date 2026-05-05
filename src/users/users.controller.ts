@@ -39,4 +39,18 @@ export class UsersController {
     const offset = offsetStr ? parseInt(offsetStr, 10) : 0;
     return this.usersService.getDonations(supabaseUid, limit, offset);
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me/publisher-stats')
+  async getPublisherStats(@Request() req: any) {
+    const supabaseUid = req.user.supabase_uid;
+    return this.usersService.getPublisherStats(supabaseUid);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me/campaigns')
+  async getMyCampaigns(@Request() req: any) {
+    const supabaseUid = req.user.supabase_uid;
+    return this.usersService.getMyCampaigns(supabaseUid);
+  }
 }
