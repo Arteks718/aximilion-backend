@@ -9,7 +9,7 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Post('sync')
   syncUser(@Request() req: any) {
-    const { supabase_uid, email } = req.user;
-    return this.authService.syncSupabaseUser(supabase_uid, email);
+    const { supabase_uid, email, full_name } = req.user;
+    return this.authService.syncSupabaseUser(supabase_uid, email, full_name);
   }
 }

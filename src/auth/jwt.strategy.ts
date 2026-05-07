@@ -27,6 +27,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // Payload decoded from the Supabase-issued RS256 JWT
     // `sub` holds the Supabase user UUID; injected into `req.user`
-    return { supabase_uid: payload.sub, email: payload.email };
+    return { supabase_uid: payload.sub, email: payload.email, full_name: payload.user_metadata.full_name };
   }
 }

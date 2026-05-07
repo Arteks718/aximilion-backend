@@ -44,7 +44,7 @@ export class UsersService {
       .returning();
     return newUser;
   }
-  async syncSupabaseUser(supabaseUid: string, email: string) {
+  async syncSupabaseUser(supabaseUid: string, email: string, fullName: string | null) {
     let user = await this.db.query.users.findFirst({
       where: eq(schema.users.supabaseUid, supabaseUid),
     });
@@ -55,6 +55,7 @@ export class UsersService {
         .values({
           email: email,
           supabaseUid: supabaseUid,
+          fullName: fullName,
           role: 'registered',
           authProvider: 'local',
         })

@@ -7,7 +7,7 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
-  async syncSupabaseUser(sub: string, email: string) {
-    return this.usersService.syncSupabaseUser(sub, email);
+  async syncSupabaseUser(sub: string, email: string, fullName: string | null) {
+    return this.usersService.syncSupabaseUser(sub, email, fullName);
   }
 }
