@@ -6,6 +6,11 @@ import { AuthGuard } from '@nestjs/passport';
 export class BadgesController {
   constructor(private readonly badgesService: BadgesService) {}
 
+  @Get()
+  getAllBadges() {
+    return this.badgesService.getAllBadges();
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('my')
   getMyBadges(@Req() req: any) {

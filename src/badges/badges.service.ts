@@ -59,6 +59,10 @@ export class BadgesService {
     }
   }
 
+  async getAllBadges() {
+    return this.db.query.badges.findMany();
+  }
+
   async getMyBadges(userId: string) {
     const userBadgesList = await this.db.query.userBadges.findMany({
       where: eq(schema.userBadges.userId, userId),
